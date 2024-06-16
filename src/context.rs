@@ -24,6 +24,24 @@ impl Context {
 		}
 	}
 	pub fn lookup_var(&self, query: String) -> Result<f64, CalcError> {
+		// hard coded 'ans' variable
+		if query.eq("ans") {
+			if self.history.is_empty() {
+				return Err(CalcError {
+					error_type: CalcErrorType::UndefinedVariable,
+					msg: "Cannot use \'ans\' without a previous equation".to_string(),
+				});
+			}
+			for entry in self.history.clone().into_iter().rev() {
+				if let Some(answer) = entry.result {
+					return Ok(answer);
+				}
+			}
+			return Err(CalcError {
+				error_type: CalcErrorType::UndefinedVariable,
+				msg: "Cannot use \'ans\' without a previous valid solution".to_string(),
+			})
+		}
 		for entry in &self.var_table {
 			if entry.name.eq(&query) {
 				return Ok(entry.value);
@@ -71,6 +89,7 @@ impl VarTableEntry {
 	}
 }
 
+#[derive(Clone)]
 pub struct HistEntry {
 	input: String,
 	result: Option<f64>,
