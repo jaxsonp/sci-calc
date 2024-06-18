@@ -1,5 +1,4 @@
-use core::num;
-use std::fmt;
+use std::{f32::consts::E, fmt};
 use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 
@@ -35,7 +34,7 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 			}
 		};
 		// extracting assignment information from parsing result
-		let mut root: Pair<Rule>;
+		let root: Pair<Rule>;
 		match &tree.as_rule() {
 			Rule::assignment => {
 				let inner = tree.into_inner();
@@ -55,7 +54,7 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 			}
 		}
 
-		fn evaluate_val(pair: Pair<Rule>, input_str: &str, ctx: &Context) -> Result<f64, CalcError> {
+		fn evaluate_atom(pair: Pair<Rule>, input_str: &str, ctx: &Context) -> Result<f64, CalcError> {
 			match pair.as_rule() {
 				Rule::NUM => {
 					let span = pair.as_span();
@@ -65,7 +64,35 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 				Rule::IDENT => {
 					let span = pair.as_span();
 					let name = &input_str[span.start()..span.end()];
-					return ctx.lookup_var(name.to_string());
+					if let Some(result) = ctx.lookup_var(name.to_string()) {
+						return result;
+					}
+					return Err(CalcError {
+						error_type: CalcErrorType::UndefinedIdentifier,
+						msg: format!("Unknown variable \'{name}\'").to_string()
+					})
+				}
+				Rule::function => {
+					// getting name 
+					let mut inner = pair.into_inner();
+					let name_pair = inner.next().unwrap();
+					let span = name_pair.as_span();
+					let name = &input_str[span.start()..span.end()];
+					let args_pair = inner.next().unwrap();
+					let mut args: Vec<f64> = Vec::new();
+					for arg_pair in args_pair.into_inner() {
+						match evaluate_atom(arg_pair, input_str, ctx) {
+							Ok(val) => { args.push(val); }
+							Err(e) => { return Err(e); }
+						}
+					}
+					if let Some(result) = ctx.try_function(name.to_string(), args) {
+						return result;
+					}
+					Err(CalcError {
+						error_type: CalcErrorType::UndefinedIdentifier,
+						msg: format!("Unknown function \'{name}\'").to_string()
+					})
 				}
 				_ => {
 					match parse_tree(pair, input_str, &ctx) {
@@ -80,9 +107,12 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 
 		// recursively parsing AST
 		fn parse_tree(pair: Pair<Rule>, input_str: &str, ctx: &Context) -> Result<f64, CalcError> {
+			if matches!(pair.as_rule(), Rule::function) {
+				return evaluate_atom(pair, input_str, ctx);
+			}
 			let mut inner = pair.into_inner();
 			let lhs_pair = inner.next().unwrap();
-			let lhs: f64 = match evaluate_val(lhs_pair, input_str, ctx) {
+			let lhs: f64 = match evaluate_atom(lhs_pair, input_str, ctx) {
 				Ok(n) => { n }
 				Err(e) => {
 					return Err(e);
@@ -96,6 +126,7 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 							operator = pair.as_rule();
 						}
 						_ => {
+							// LHS followed by non-operator
 							return Err(CalcError {
 								error_type: CalcErrorType::ParserError,
 								msg: "Invalid syntax tree (expecting operator)".to_string()
@@ -110,7 +141,7 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 			}
 			let rhs: f64 = match inner.next() {
 				Some(rhs_pair) => {
-					match evaluate_val(rhs_pair, input_str, ctx) {
+					match evaluate_atom(rhs_pair, input_str, ctx) {
 						Ok(n) => { n }
 						Err(e) => {
 							return Err(e);
@@ -118,6 +149,7 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 					}
 				}
 				None => {
+					// missing RHS
 					return Err(CalcError {
 						error_type: CalcErrorType::ParserError,
 						msg: "Invalid syntax tree (missing RHS)".to_string()
@@ -169,17 +201,20 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 pub enum CalcErrorType {
 	SyntaxError,
 	ParserError,
-	UndefinedVariable,
+	UndefinedIdentifier,
 	AssignmentError,
+	ArgumentError,
 }
 impl fmt::Display for CalcErrorType {
 	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-		match *self {
-			Self::SyntaxError => write!(formatter, "Syntax error"),
-			Self::ParserError => write!(formatter, "Parser error"),
-			Self::UndefinedVariable => write!(formatter, "Undefined variable"),
-			Self::AssignmentError => write!(formatter, "Assignment error"),
-		}
+		let s: &str = match *self {
+			Self::SyntaxError => { "Syntax error" },
+			Self::ParserError => { "Parser error" },
+			Self::UndefinedIdentifier => { "Undefined identifier" },
+			Self::AssignmentError => { "Assignment error" },
+			Self::ArgumentError => { "Argument error" },
+		};
+		write!(formatter, "{s}")
 	}
 }
 

@@ -1,9 +1,11 @@
+
 use crate::{CalcError, CalcErrorType};
 
 
 pub struct Context {
 	pub var_table: Vec<VarTableEntry>,
-	pub history: Vec<HistEntry>
+	pub history: Vec<HistEntry>,
+	function_table: Vec<Function>
 }
 impl Context {
 	pub fn new() -> Self {
@@ -20,38 +22,66 @@ impl Context {
 					constant: true,
 				}
 			],
+			function_table: vec![
+				Function {
+					name: "sqrt".to_string(),
+					num_args: 1,
+					closure: Box::new(|args| {
+						f64::sqrt(args[0])
+					})
+				},
+				Function {
+					name: "ln".to_string(),
+					num_args: 1,
+					closure: Box::new(|args| {
+						f64::log(args[0], std::f64::consts::E)
+					})
+				}
+			],
 			history: Vec::new(),
 		}
 	}
-	pub fn lookup_var(&self, query: String) -> Result<f64, CalcError> {
-		// hard coded 'ans' variable
+	pub fn lookup_var(&self, query: String) -> Option<Result<f64, CalcError>> {
+		// answer variable
 		if query.eq("ans") {
 			if self.history.is_empty() {
-				return Err(CalcError {
-					error_type: CalcErrorType::UndefinedVariable,
+				return Some(Err(CalcError {
+					error_type: CalcErrorType::ParserError,
 					msg: "Cannot use \'ans\' without a previous equation".to_string(),
-				});
+				}));
 			}
 			for entry in self.history.clone().into_iter().rev() {
 				if let Some(answer) = entry.result {
-					return Ok(answer);
+					return Some(Ok(answer));
 				}
 			}
-			return Err(CalcError {
-				error_type: CalcErrorType::UndefinedVariable,
+			return Some(Err(CalcError {
+				error_type: CalcErrorType::ParserError,
 				msg: "Cannot use \'ans\' without a previous valid solution".to_string(),
-			})
+			}));
 		}
+
+		// looking up var in table
 		for entry in &self.var_table {
 			if entry.name.eq(&query) {
-				return Ok(entry.value);
+				return Some(Ok(entry.value));
 			}
 		}
-		return Err(CalcError {
-			error_type: CalcErrorType::UndefinedVariable,
-			msg: format!("Undefined variable \'{}\'", query).to_string()
-		});
+		return None;
 	}
+
+	pub fn try_function(&self, name: String, args: Vec<f64>) -> Option<Result<f64, CalcError>> {
+		for f in self.function_table.iter() {
+			if !f.name.eq(&name) { continue; }
+			if f.num_args != args.len() { return Some(Err(CalcError {
+				error_type: CalcErrorType::ArgumentError,
+				msg: "Invalid number of arguments".to_string(),
+			})); }
+			return Some(Ok((f.closure)(args)));
+		}
+		return None;
+	}
+
 	pub fn assign_var(&mut self, query: String, val: f64) -> Result<(), CalcError> {
 		for entry in &mut self.var_table {
 			if entry.name.eq(&query) {
@@ -87,6 +117,12 @@ impl VarTableEntry {
 			constant
 		}
 	}
+}
+
+struct Function {
+	name: String,
+	num_args: usize,
+	closure: Box<dyn Fn(Vec<f64>) -> f64>
 }
 
 #[derive(Clone)]
