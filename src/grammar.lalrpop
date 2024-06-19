@@ -1,26 +1,34 @@
-use crate::ast::*;
+use lalrpop_util::ErrorRecovery;
+
+use crate::{CalcError, CalcErrorType, ast::*};
 
 grammar;
 
-pub target: Box<Expr> = { // (1)
-	expression
+pub target: (Box<Expr>, Option<String>) = { // (1)
+	<var: Ident> "=" <e: expression> => (e, Some(var)),
+	<e: expression> => (e, None),
+
 };
 
 expression: Box<Expr> = {
 	#[precedence(level="0")]
-    term,
-    #[precedence(level="1")] #[assoc(side="left")]
-    <e: expression> "!" => Box::new(Expr::Fac(e)),
-    #[precedence(level="1")] #[assoc(side="left")]
-    <lhs: expression> "^" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Exp, rhs)),
-    #[precedence(level="1")] #[assoc(side="left")]
-    <lhs: expression> "*" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Mul, rhs)),
-    <lhs: expression> "/" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Div, rhs)),
-    <lhs: expression> "//" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::FloorDiv, rhs)),
-    <lhs: expression> "%" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Mod, rhs)),
-    #[precedence(level="2")] #[assoc(side="left")]
-    <lhs: expression> "+" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Add, rhs)),
-    <lhs: expression> "-" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Sub, rhs)),
+	term,
+	#[precedence(level="1")] #[assoc(side="left")]
+	<e: expression> "!" => Box::new(Expr::Fac(e)),
+	#[precedence(level="1")] #[assoc(side="left")]
+	<lhs: expression> "^" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Exp, rhs)),
+	#[precedence(level="1")] #[assoc(side="left")]
+	<lhs: expression> "*" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Mul, rhs)),
+	<lhs: expression> "/" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Div, rhs)),
+	<lhs: expression> "//" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::FloorDiv, rhs)),
+	<lhs: expression> "%" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Mod, rhs)),
+	#[precedence(level="2")] #[assoc(side="left")]
+	<lhs: expression> "+" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Add, rhs)),
+	<lhs: expression> "-" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Sub, rhs)),
+	! => { Box::new(Expr::Err(CalcError{
+		error_type: CalcErrorType::ParserError,
+		msg: String::from("Malformed expression"),
+	})) },
 };
 
 term: Box<Expr> = {

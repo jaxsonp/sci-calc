@@ -1,16 +1,20 @@
 use std::fmt;
 
+use crate::CalcError;
+
 pub enum Expr {
     Num(f64),
     Op(Box<Expr>, Operation, Box<Expr>),
 	Fac(Box<Expr>),
+	Err(CalcError)
 }
 impl fmt::Display for Expr {
 	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
 		let s = match self {
 			Self::Num(n) => n.to_string(),
-			Self::Op(lhs, op, rhs) => format!("({lhs}{op} {rhs})"),
-			Self::Fac(n) => format!("{n}!")
+			Self::Op(lhs, op, rhs) => format!("({lhs}{op}{rhs})"),
+			Self::Fac(n) => format!("{n}!"),
+			Self::Err(e) => format!("{e}"),
 		};
 		write!(formatter, "{}", s)
 	}

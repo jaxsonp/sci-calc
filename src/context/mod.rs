@@ -4,8 +4,8 @@ use crate::{CalcError, CalcErrorType};
 mod builtins;
 
 pub struct Context {
-	pub var_table: Vec<VarTableEntry>,
-	pub history: Vec<HistEntry>,
+	var_table: Vec<VarTableEntry>,
+	history: Vec<HistEntry>,
 	function_table: Vec<Function>
 }
 impl Context {
@@ -16,7 +16,7 @@ impl Context {
 			history: Vec::new(),
 		}
 	}
-	pub fn lookup_var(&self, query: String) -> Option<Result<f64, CalcError>> {
+	fn lookup_var(&self, query: String) -> Option<Result<f64, CalcError>> {
 		// answer variable
 		if query.eq("ans") {
 			if self.history.is_empty() {
@@ -45,7 +45,7 @@ impl Context {
 		return None;
 	}
 
-	pub fn try_function(&self, name: String, args: Vec<f64>) -> Option<Result<f64, CalcError>> {
+	fn try_function(&self, name: String, args: Vec<f64>) -> Option<Result<f64, CalcError>> {
 		for f in self.function_table.iter() {
 			if !f.name.eq(&name) { continue; }
 			if f.num_args <= 0 && f.num_args != args.len() { return Some(Err(CalcError {
@@ -57,7 +57,7 @@ impl Context {
 		return None;
 	}
 
-	pub fn assign_var(&mut self, query: String, val: f64) -> Result<(), CalcError> {
+	fn assign_var(&mut self, query: String, val: f64) -> Result<(), CalcError> {
 		for entry in &mut self.var_table {
 			if entry.name.eq(&query) {
 				if entry.constant {
@@ -79,7 +79,7 @@ impl Context {
 	}
 }
 
-pub struct VarTableEntry {
+struct VarTableEntry {
 	pub name: String,
 	pub value: f64,
 	pub constant: bool,
@@ -101,7 +101,7 @@ struct Function {
 }
 
 #[derive(Clone)]
-pub struct HistEntry {
+struct HistEntry {
 	input: String,
 	result: Option<f64>,
 }
