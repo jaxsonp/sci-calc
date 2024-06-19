@@ -1,6 +1,6 @@
 
 use std::io::stdin;
-use ansi_term::Colour::{Red, };
+use ansi_term::Colour::Red;
 
 use scientific_calculator::{calculate, context::Context};
 fn main() {
