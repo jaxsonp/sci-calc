@@ -1,4 +1,4 @@
-use std::{f32::consts::E, fmt};
+use std::fmt;
 use pest::{iterators::Pair, Parser};
 use pest_derive::Parser;
 
@@ -159,24 +159,31 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 			// doin da math
 			let output = match operator {
 				Rule::PLUS => {
-					lhs + rhs
+					Ok(lhs + rhs)
 				}
 				Rule::MINUS => {
-					lhs - rhs
+					Ok(lhs - rhs)
 				}
 				Rule::MULTIPLY => {
-					lhs * rhs
+					Ok(lhs * rhs)
 				}
 				Rule::DIVIDE => {
-					lhs / rhs
+					if rhs != 0.0 {
+						Ok(lhs / rhs)
+					} else {
+						Err(CalcError {
+							error_type: CalcErrorType::CalculationError,
+							msg: String::from("Divide by zero")
+						})
+					}
 				}
 				Rule::CARET => {
-					lhs.powf(rhs)
+					Ok(lhs.powf(rhs))
 				}
 				_ => { unreachable!(); }
 			};
 
-			Ok(output)
+			output
 		}
 		parse_tree(root, input_str, &ctx)
 	};
@@ -204,6 +211,7 @@ pub enum CalcErrorType {
 	UndefinedIdentifier,
 	AssignmentError,
 	ArgumentError,
+	CalculationError,
 }
 impl fmt::Display for CalcErrorType {
 	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -213,6 +221,7 @@ impl fmt::Display for CalcErrorType {
 			Self::UndefinedIdentifier => { "Undefined identifier" },
 			Self::AssignmentError => { "Assignment error" },
 			Self::ArgumentError => { "Argument error" },
+			Self::CalculationError => { "Calculation error" },
 		};
 		write!(formatter, "{s}")
 	}

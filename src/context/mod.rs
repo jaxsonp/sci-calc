@@ -1,6 +1,7 @@
 
 use crate::{CalcError, CalcErrorType};
 
+mod builtins;
 
 pub struct Context {
 	pub var_table: Vec<VarTableEntry>,
@@ -10,34 +11,8 @@ pub struct Context {
 impl Context {
 	pub fn new() -> Self {
 		Self {
-			var_table: vec![
-				VarTableEntry {
-					name: "pi".to_string(),
-					value: std::f64::consts::PI,
-					constant: true,
-				},
-				VarTableEntry {
-					name: "e".to_string(),
-					value: std::f64::consts::E,
-					constant: true,
-				}
-			],
-			function_table: vec![
-				Function {
-					name: "sqrt".to_string(),
-					num_args: 1,
-					closure: Box::new(|args| {
-						f64::sqrt(args[0])
-					})
-				},
-				Function {
-					name: "ln".to_string(),
-					num_args: 1,
-					closure: Box::new(|args| {
-						f64::log(args[0], std::f64::consts::E)
-					})
-				}
-			],
+			var_table: builtins::get_consts(),
+			function_table: builtins::get_functions(),
 			history: Vec::new(),
 		}
 	}
@@ -73,11 +48,11 @@ impl Context {
 	pub fn try_function(&self, name: String, args: Vec<f64>) -> Option<Result<f64, CalcError>> {
 		for f in self.function_table.iter() {
 			if !f.name.eq(&name) { continue; }
-			if f.num_args != args.len() { return Some(Err(CalcError {
+			if f.num_args <= 0 && f.num_args != args.len() { return Some(Err(CalcError {
 				error_type: CalcErrorType::ArgumentError,
 				msg: "Invalid number of arguments".to_string(),
 			})); }
-			return Some(Ok((f.closure)(args)));
+			return Some((f.closure)(args));
 		}
 		return None;
 	}
@@ -122,7 +97,7 @@ impl VarTableEntry {
 struct Function {
 	name: String,
 	num_args: usize,
-	closure: Box<dyn Fn(Vec<f64>) -> f64>
+	closure: Box<dyn Fn(Vec<f64>) -> Result<f64, CalcError>>
 }
 
 #[derive(Clone)]
