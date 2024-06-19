@@ -1,4 +1,6 @@
+
 use std::io::stdin;
+use ansi_term::Colour::{Red, };
 
 use scientific_calculator::{calculate, context::Context};
 fn main() {
@@ -15,7 +17,7 @@ fn main() {
 		let input_string = raw_input.trim();
 		match calculate(input_string, &mut ctx) {
 			Ok(result) => println!(" = {}", result),
-			Err(e) => println!("Error: {e}"),
+			Err(e) => println!("{}", Red.paint(e.to_string())),
 		}
 	}
 }

@@ -8,12 +8,10 @@ exp_expr =  {
 	| atom
 }
 mult_expr =  {
-	exp_expr ~ (MULTIPLY | DIVIDE) ~ mult_expr
-	| exp_expr
+	exp_expr ~ ((MULTIPLY | DIVIDE) ~ mult_expr)*
 }
 add_expr =  {
-	mult_expr ~ (PLUS | MINUS) ~ add_expr
-	| mult_expr
+	mult_expr ~ ((PLUS | MINUS) ~ add_expr)*
 }
 atom = _{
 	(L_PAREN ~ add_expr ~ R_PAREN)
