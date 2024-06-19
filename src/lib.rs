@@ -1,27 +1,23 @@
 use std::fmt;
+use lalrpop_util::lalrpop_mod;
 
 pub mod context;
 use context::*;
 
-mod parser;
+mod ast;
 
-mod lexer;
+lalrpop_mod!(pub grammar);
 
 pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 
-	let tokens = match lexer::tokenize(input_str) {
-		Ok(tokens) => { tokens }
-		Err(e) => { return Err(e); }
-	};
-	for t in tokens { print!("{t} "); }
-	println!();
-
-	parser::parse();
-	Ok(0.0)
+	let parser = grammar::targetParser::new();
+	println!("{}", parser.parse(input_str).unwrap());
+	return Ok(1.0);
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
+	EOI,
 	Ident(String),
 	Literal(f64),
 	LParen,
@@ -38,6 +34,7 @@ pub enum Token {
 impl fmt::Display for Token {
 	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
 		let s = match self {
+			Self::EOI => { String::from("EOI") },
 			Self::Ident(name) => { format!("\"{name}\"") },
 			Self::Literal(num) => { format!("{num}") },
 			Self::LParen => { String::from("(") },

@@ -1,0 +1,35 @@
+use crate::ast::*;
+
+grammar;
+
+pub target: Box<Expr> = { // (1)
+	expression
+};
+
+expression: Box<Expr> = {
+	#[precedence(level="0")]
+    term,
+    #[precedence(level="1")] #[assoc(side="left")]
+    <e: expression> "!" => Box::new(Expr::Fac(e)),
+    #[precedence(level="1")] #[assoc(side="left")]
+    <lhs: expression> "^" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Exp, rhs)),
+    #[precedence(level="1")] #[assoc(side="left")]
+    <lhs: expression> "*" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Mul, rhs)),
+    <lhs: expression> "/" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Div, rhs)),
+    <lhs: expression> "//" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::FloorDiv, rhs)),
+    <lhs: expression> "%" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Mod, rhs)),
+    #[precedence(level="2")] #[assoc(side="left")]
+    <lhs: expression> "+" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Add, rhs)),
+    <lhs: expression> "-" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Sub, rhs)),
+};
+
+term: Box<Expr> = {
+	"(" <e: expression> ")" => e,
+	<n: NumLiteral> => Box::new(Expr::Num(n)),
+};
+
+Ident: String = <s:r"[a-zA-Z][a-zA-Z0-9_.]*"> => String::from(s);
+NumLiteral: f64 = <s:r"[0-9]+(?:\.[0-9]+)?(?:e[0-9]+)?"> => s.parse::<f64>().expect("Failed to parse num literal");
+
+// let ident_re = Regex::new(r"^[a-zA-Z][a-zA-Z0-9_.]*$").expect("Failed to generate ident regex");
+// let num_re = Regex::new(r"^[0-9]+(?:\.[0-9]+)?(?:e[0-9]+)?$").expect("Failed to generate number regex");
