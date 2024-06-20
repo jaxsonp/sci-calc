@@ -6,6 +6,7 @@ pub enum Expr {
     Num(f64),
     Op(Box<Expr>, Operation, Box<Expr>),
 	Func(String, Vec<Box<Expr>>),
+	Var(String),
 	Fac(Box<Expr>),
 	Err(CalcError)
 }
@@ -23,6 +24,7 @@ impl fmt::Display for Expr {
 				arg_list.pop();
 				format!("{name}({arg_list})")
 			},
+			Self::Var(name) => format!("{name}"),
 			Self::Fac(n) => format!("{n}!"),
 			Self::Err(e) => format!("{e}"),
 		};

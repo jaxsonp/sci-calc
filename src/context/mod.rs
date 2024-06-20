@@ -16,7 +16,25 @@ impl Context {
 			history: Vec::new(),
 		}
 	}
-	fn lookup_var(&self, query: String) -> Option<Result<f64, CalcError>> {
+	/*fn assign_var(&mut self, name: &String, val: f64) -> Result<(), CalcError> {
+		for entry in self.var_table.iter_mut() {
+			if entry.name.eq(name) {
+				if entry.constant {
+					return Err(CalcError {
+						error_type: CalcErrorType::AssignmentError,
+						msg: format!("Can't assign to constant \"{name}\""),
+					});
+				}
+				entry.value = val;
+				return Ok(());
+			}
+		}
+		return Err(CalcError {
+			error_type: CalcErrorType::AssignmentError,
+			msg: format!("Can't assign to constant \"{name}\""),
+		});
+	}*/
+	pub fn lookup_var(&self, query: &String) -> Option<Result<f64, CalcError>> {
 		// answer variable
 		if query.eq("ans") {
 			if self.history.is_empty() {
@@ -38,7 +56,7 @@ impl Context {
 
 		// looking up var in table
 		for entry in &self.var_table {
-			if entry.name.eq(&query) {
+			if entry.name.eq(query) {
 				return Some(Ok(entry.value));
 			}
 		}
@@ -59,9 +77,9 @@ impl Context {
 		return None;
 	}
 
-	fn assign_var(&mut self, query: String, val: f64) -> Result<(), CalcError> {
+	pub fn assign_var(&mut self, query: &String, val: f64) -> Result<(), CalcError> {
 		for entry in &mut self.var_table {
-			if entry.name.eq(&query) {
+			if entry.name.eq(query) {
 				if entry.constant {
 					return Err(CalcError {
 						error_type: CalcErrorType::AssignmentError,
@@ -73,7 +91,7 @@ impl Context {
 			}
 		}
 		self.var_table.push(VarTableEntry {
-			name: query,
+			name: query.clone(),
 			value: val,
 			constant: false,
 		});

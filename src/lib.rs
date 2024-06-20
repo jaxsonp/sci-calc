@@ -21,7 +21,10 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 
 	// handling assignment
 	if assignment.is_some() && res.is_ok() {
-		let _assign_var = assignment.unwrap();
+		let assign_var = assignment.unwrap();
+		if let Err(e) = ctx.assign_var(&assign_var, res.clone().unwrap()) {
+			return Err(e);
+		}
 	}
 
 	return res;
@@ -69,6 +72,15 @@ fn evaluate_ast(root: Expr, ctx: &Context) -> Result<f64, CalcError> {
 			return Err(CalcError {
 				error_type: CalcErrorType::UndefinedIdentifier,
 				msg: format!("Unknown function \"{name}()\""),
+			})
+		}
+		Expr::Var(name) => {
+			if let Some(res) = ctx.lookup_var(&name) {
+				return res;
+			}
+			return Err(CalcError {
+				error_type: CalcErrorType::UndefinedIdentifier,
+				msg: format!("Unknown variable \"{name}\""),
 			})
 		}
 		Expr::Fac(e) => {
