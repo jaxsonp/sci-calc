@@ -104,15 +104,6 @@ struct VarTableEntry {
 	pub value: f64,
 	pub constant: bool,
 }
-impl VarTableEntry {
-	pub fn new(name: String, value: f64, constant: bool) -> Self {
-		Self {
-			name,
-			value,
-			constant
-		}
-	}
-}
 
 struct Function {
 	name: String,
@@ -124,12 +115,4 @@ struct Function {
 struct HistEntry {
 	input: String,
 	result: Option<f64>,
-}
-impl HistEntry {
-	pub fn new(input: String, result: Option<f64>) -> Self {
-		Self {
-			input,
-			result
-		}
-	}
 }
