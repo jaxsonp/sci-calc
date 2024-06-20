@@ -45,13 +45,15 @@ impl Context {
 		return None;
 	}
 
-	fn try_function(&self, name: String, args: Vec<f64>) -> Option<Result<f64, CalcError>> {
+	pub fn try_function(&self, name: &String, args: Vec<f64>) -> Option<Result<f64, CalcError>> {
 		for f in self.function_table.iter() {
-			if !f.name.eq(&name) { continue; }
-			if f.num_args <= 0 && f.num_args != args.len() { return Some(Err(CalcError {
-				error_type: CalcErrorType::ArgumentError,
-				msg: "Invalid number of arguments".to_string(),
-			})); }
+			if !f.name.eq(name) { continue; }
+			if f.num_args != 0 && f.num_args != args.len() {
+				return Some(Err(CalcError {
+					error_type: CalcErrorType::ArgumentError,
+					msg: "Invalid number of arguments".to_string(),
+				}));
+			}
 			return Some((f.closure)(args));
 		}
 		return None;

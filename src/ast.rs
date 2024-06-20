@@ -5,6 +5,7 @@ use crate::CalcError;
 pub enum Expr {
     Num(f64),
     Op(Box<Expr>, Operation, Box<Expr>),
+	Func(String, Vec<Box<Expr>>),
 	Fac(Box<Expr>),
 	Err(CalcError)
 }
@@ -13,6 +14,15 @@ impl fmt::Display for Expr {
 		let s = match self {
 			Self::Num(n) => n.to_string(),
 			Self::Op(lhs, op, rhs) => format!("({lhs}{op}{rhs})"),
+			Self::Func(name, args) => {
+				let mut arg_list = String::new();
+				for e in args.iter() {
+					arg_list += e.to_string().as_str();
+					arg_list.push(',');
+				}
+				arg_list.pop();
+				format!("{name}({arg_list})")
+			},
 			Self::Fac(n) => format!("{n}!"),
 			Self::Err(e) => format!("{e}"),
 		};
