@@ -7,7 +7,7 @@ edition = "2021"
 readme = "README.md"
 repository = "https://github.com/jaxsonp/sci-calc"
 license = "MIT"
-keywords = ["calculator", "scientific-calculator", "cli"]
+keywords = ["calculator", "scientific", "sci-calc", "math", "cli"]
 categories = ["command-line-utilities"]
 
 [build-dependencies]
