@@ -35,6 +35,7 @@ term: Box<Expr> = {
 	<name: Ident> "(" <args: arg_list> ")" => Box::new(Expr::Func(name, args)),
 	"(" <e: expression> ")" => e,
 	#[precedence(level="1")]
+	"-(" <e: expression> ")" => Box::new(Expr::Op(Box::new(Expr::Num(0.0)), Operation::Sub, e)),
 	<num: NumLiteral> => Box::new(Expr::Num(num)),
 	<name: Ident> => Box::new(Expr::Var(name)),
 };
