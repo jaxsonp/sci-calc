@@ -1,6 +1,7 @@
 
+use libm::tgamma;
+
 use super::{VarTableEntry, Function};
-use crate::{CalcError, CalcErrorType};
 
 pub fn get_consts() -> Vec<VarTableEntry> {
 	vec![
@@ -42,23 +43,13 @@ pub fn get_functions() -> Vec<Function> {
 		Function {
 			name: String::from("fac"),
 			num_args: 1,
-			closure: Box::new(|args| {
-				if args[0] < 0f64 { return Err(CalcError {
-					error_type: CalcErrorType::CalculationError,
-					msg: String::from("Negative factorial has no real value"),
-				})}
-				let mut fac = 1f64;
-				for i in 2..=(args[0] as u32) {
-					fac *= i as f64;
-				}
-				Ok(fac)
-			})
+			closure: Box::new(|args| { Ok(tgamma(args[0] + 1.0)) })
 		},
 		Function {
 			name: String::from("mean"),
 			num_args: 0,
 			closure: Box::new(|args| { 
-				let mut sum = 0f64;
+				let mut sum = 0.0;
 				for arg in args.iter() {
 					sum += arg;
 				}
@@ -70,14 +61,14 @@ pub fn get_functions() -> Vec<Function> {
 			num_args: 0,
 			closure: Box::new(|args| { 
 				let n = args.len() as f64;
-				let mut sum = 0f64;
+				let mut sum = 0.0;
 				for arg in args.iter() {
 					sum += arg;
 				}
 				let mean = sum.div_euclid(n);
-				let mut dividend = 0f64;
+				let mut dividend = 0.0;
 				for arg in args.iter() {
-					dividend += (arg - mean).powf(2f64);
+					dividend += (arg - mean).powf(2.0);
 				}
 				Ok(f64::sqrt(dividend / n))
 			})
