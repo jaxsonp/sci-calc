@@ -2,7 +2,6 @@ use super::*;
 
 #[test]
 fn test_create_context() {
-	
 	let _ctx = Context::new();
 }
 
@@ -19,13 +18,6 @@ fn test_lookup_var_failure() {
 	let res = ctx.lookup_var(&String::from("smth"));
 	assert!(res.is_none());
 }
-
-/*#[test]
-fn test_lookup_var_ans() {
-	let ctx = Context::new();
-	let res = ctx.lookup_var(&String::from("ans"));
-	assert!(false);
-}*/
 
 #[test]
 fn test_lookup_var_ans_failure() {

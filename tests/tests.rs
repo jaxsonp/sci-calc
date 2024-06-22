@@ -82,6 +82,13 @@ fn test_var_const() {
 }
 
 #[test]
+fn test_var_ans() {
+	let mut ctx = Context::new();
+	let _ = calculate("5 + 5", &mut ctx);
+	assert_eq!(calculate("ans + 5", &mut ctx).unwrap(), 15.0);
+}
+
+#[test]
 fn test_function_1() {
 	let mut ctx = Context::new();
 	assert_eq!(calculate("sqrt(4)", &mut ctx).unwrap(), 2.0);
