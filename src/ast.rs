@@ -1,14 +1,11 @@
 use std::fmt;
 
-use crate::CalcError;
-
 pub enum Expr {
     Num(f64),
     Op(Box<Expr>, Operation, Box<Expr>),
 	Func(String, Vec<Box<Expr>>),
 	Var(String),
 	Fac(Box<Expr>),
-	Err(CalcError)
 }
 impl fmt::Display for Expr {
 	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -26,7 +23,6 @@ impl fmt::Display for Expr {
 			},
 			Self::Var(name) => format!("{name}"),
 			Self::Fac(n) => format!("{n}!"),
-			Self::Err(e) => format!("{e}"),
 		};
 		write!(formatter, "{}", s)
 	}

@@ -24,10 +24,6 @@ expression: Box<Expr> = {
 	#[precedence(level="4")] #[assoc(side="left")]
 	<lhs: expression> "+" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Add, rhs)),
 	<lhs: expression> "-" <rhs: expression> => Box::new(Expr::Op(lhs, Operation::Sub, rhs)),
-	! => { Box::new(Expr::Err(CalcError{
-		error_type: CalcErrorType::ParserError,
-		msg: String::from("Malformed expression"),
-	})) },
 };
 
 term: Box<Expr> = {
