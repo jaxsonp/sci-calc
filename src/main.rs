@@ -1,4 +1,5 @@
 
+use std::env;
 use rustyline::{history::History, DefaultEditor};
 use ansi_term::Color::Red;
 
@@ -8,7 +9,22 @@ fn main() {
 
 	let mut ctx = Context::new();
 
-	// IO
+	// calculating 
+	if env::args().len() > 1 {
+		let mut input = String::new();
+		for arg in env::args().skip(1) {
+			input.push_str(&arg);
+			input.push(' ');
+		}
+		println!("{input}");
+		match calculate(input.as_str(), &mut ctx) {
+			Ok(result) => println!(" = {result}"),
+			Err(e) => println!("{}", Red.paint(e.to_string())),
+		}
+		return;
+	}
+
+	// CLI IO
 	let mut rl = DefaultEditor::new().unwrap();
 	loop {
 		let readline = rl.readline("");
@@ -18,6 +34,7 @@ fn main() {
 		let input = readline.unwrap();
 		let input = input.as_str();
 		if input.eq_ignore_ascii_case("exit") { break; }
+		if input.eq("") { continue; }
 
 		match calculate(input, &mut ctx) {
 			Ok(result) => {
