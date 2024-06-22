@@ -9,6 +9,6 @@ lalrpop = "0.20.2"
 
 [dependencies]
 ansi_term = "0.12.1"
-regex = "1.10.5"
 lalrpop-util = { version = "0.20.2", features = ["lexer", "unicode"] }
 libm = "0.2.8"
+rustyline = "14.0.0"
