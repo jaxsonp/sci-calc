@@ -22,11 +22,19 @@ pub fn calculate(input_str: &str, ctx: &mut Context) -> Result<f64, CalcError> {
 
 	let res = evaluate_ast(*tree, ctx);
 
-	// handling assignment
-	if assignment.is_some() && res.is_ok() {
-		let assign_var = assignment.unwrap();
-		if let Err(e) = ctx.assign_var(&assign_var, res.clone().unwrap()) {
-			return Err(e);
+	if res.is_ok() {
+		let solution = res.clone().unwrap();
+
+	
+		if assignment.is_some() {
+			// handling assignment
+			let assign_var = assignment.unwrap();
+			if let Err(e) = ctx.assign_var(&assign_var, solution) {
+				return Err(e);
+			}
+		} else {
+			// setting `ans` variable
+			ctx.prev_ans = Some(solution);
 		}
 	}
 

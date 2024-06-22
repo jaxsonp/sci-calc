@@ -16,6 +16,13 @@ pub fn get_consts() -> Vec<VarTableEntry> {
 			value: std::f64::consts::E,
 			constant: true,
 		},
+		// Placeholder variable to prevent assignment, `ans` is manually
+		// evaluated elsewhere
+		VarTableEntry {
+			name: "ans".to_string(),
+			value: 0.0,
+			constant: true,
+		},
 		VarTableEntry {
 			name: "inf".to_string(),
 			value: std::f64::INFINITY,

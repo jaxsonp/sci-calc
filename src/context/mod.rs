@@ -10,7 +10,9 @@ mod tests;
 /// including defined variables, functions, and equation history
 pub struct Context {
 	var_table: Vec<VarTableEntry>,
-	history: Vec<HistEntry>,
+	/// Stores the value of the last successful calculation result, used when
+	/// evaluating the `ans` builtin variable;
+	pub prev_ans: Option<f64>,
 	function_table: Vec<Function>
 }
 
@@ -19,7 +21,7 @@ impl Context {
 		Self {
 			var_table: builtins::get_consts(),
 			function_table: builtins::get_functions(),
-			history: Vec::new(),
+			prev_ans: None,
 		}
 	}
 
@@ -29,21 +31,14 @@ impl Context {
 	pub fn lookup_var(&self, query: &String) -> Option<Result<f64, CalcError>> {
 		// answer variable
 		if query.eq("ans") {
-			if self.history.is_empty() {
+			if let Some(ans) = self.prev_ans {
+				return Some(Ok(ans));
+			} else {
 				return Some(Err(CalcError {
 					error_type: CalcErrorType::CalculationError,
-					msg: "Cannot use \'ans\' without a previous equation".to_string(),
+					msg: "Cannot use \'ans\' without a previous evaluated equation".to_string(),
 				}));
 			}
-			for entry in self.history.clone().into_iter().rev() {
-				if let Some(answer) = entry.result {
-					return Some(Ok(answer));
-				}
-			}
-			return Some(Err(CalcError {
-				error_type: CalcErrorType::CalculationError,
-				msg: "Cannot use \'ans\' without a previous valid solution".to_string(),
-			}));
 		}
 
 		// looking up var in table
@@ -111,12 +106,4 @@ struct Function {
 	name: String,
 	num_args: usize,
 	closure: Box<dyn Fn(Vec<f64>) -> Result<f64, CalcError>>
-}
-
-/// Represents a previously evaluated equation, used for recalling and for the
-/// `ans` variable
-#[derive(Clone)]
-struct HistEntry {
-	input: String,
-	result: Option<f64>,
 }
