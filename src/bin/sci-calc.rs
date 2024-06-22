@@ -3,7 +3,7 @@ use std::env;
 use rustyline::{history::History, DefaultEditor};
 use ansi_term::Color::Red;
 
-use scientific_calculator::{calculate, context::Context};
+use sci_calc::{calculate, context::Context};
 
 fn main() {
 

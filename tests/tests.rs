@@ -1,6 +1,6 @@
 //! Integration tests
 
-use scientific_calculator::{calculate, context::Context};
+use sci_calc::{calculate, context::Context};
 
 #[test]
 fn test_simple_1() {

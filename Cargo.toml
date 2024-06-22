@@ -1,8 +1,14 @@
 [package]
-name = "scientific-calculator"
-version = "0.1.0"
+name = "sci-calc"
+description = "A fully-functional scientific calculator with command line interface."
+version = "1.0.0"
 authors = ["Jaxson Pahukula <jaxpahu@gmail.com>"]
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/jaxsonp/sci-calc"
+license = "MIT"
+keywords = ["calculator", "scientific-calculator", "cli"]
+categories = ["command-line-utilities"]
 
 [build-dependencies]
 lalrpop = "0.20.2"
