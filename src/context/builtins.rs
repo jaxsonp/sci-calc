@@ -3,6 +3,7 @@ use libm::tgamma;
 
 use super::{VarTableEntry, Function};
 
+/// Constructor function for built in constants
 pub fn get_consts() -> Vec<VarTableEntry> {
 	vec![
 		VarTableEntry {
@@ -28,6 +29,7 @@ pub fn get_consts() -> Vec<VarTableEntry> {
 	]
 }
 
+/// Constructor function for builtin functions
 pub fn get_functions() -> Vec<Function> {
 	vec![
 		Function {
