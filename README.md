@@ -1,6 +1,6 @@
 # sci-calc
 
-A fully-functional scientific calculator with command line interface.
+An easy to use, fully functional scientific calculator library with command line interface.
 
 ```
 $ sci-calc
@@ -29,7 +29,7 @@ Add this crate to your project using cargo:
 cargo add sci-calc
 ```
 
-Below is a quick example of implementing the `sci-calc` crate, see the [full documentation]("https://docs.rs/sci-calc/latest/") for more details.
+Below is a quick program implementing the `sci-calc` crate, see the [full documentation](https://docs.rs/sci-calc/latest/sci_calc/) for details.
 
 ```rust
 use std::io::stdin;
@@ -48,7 +48,7 @@ fn main() {
 }
 ```
 
-## Binary
+## Command Line Interface
 
 To compile from source:
 
@@ -56,7 +56,7 @@ To compile from source:
 cargo build --release --bin sci-calc
 ```
 
-This will compile the binary to `target/release/sci-calc`. Run the binary with an equation as an argument to evaluate that expression as a one-off, or run it with no arguments to use the calculator in REPL mode. Use ctrl-C or the _exit_ keyword to exit the program.
+This will compile the binary to `target/release/sci-calc`. Run the binary with an equation as an argument to evaluate that expression as a one-off, or run it with no arguments to use the calculator as a REPL. Use ctrl-C or the _exit_ keyword to exit the program.
 
 ```
 $ sci-calc 5 + 5
